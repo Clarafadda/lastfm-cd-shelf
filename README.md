@@ -1,6 +1,6 @@
 # Mes albums
 
-Une web app qui transforme les morceaux écoutés récemment sur [Last.fm](https://www.last.fm/) en une **rangée de boîtiers de CD en 3D**, vue en perspective. Chaque boîtier est un album, les plus récents sont devant, les plus anciens s'enfoncent dans la profondeur. Le morceau en cours d'écoute sort de la rangée.
+Une web app qui transforme les morceaux écoutés récemment sur [Last.fm](https://www.last.fm/) en une **rangée de boîtiers de CD en 3D**, vue en perspective. Chaque boîtier est un album, les plus récents sont devant, les plus anciens s'enfoncent dans la profondeur. Le morceau en cours d'écoute est légèrement décalé vers l'avant.
 
 ## L'idée
 
@@ -37,13 +37,15 @@ CACHE_TTL_SECONDS=120
 
 Puis relance avec `docker compose up` (ou `docker compose up -d --force-recreate` si le conteneur tourne déjà).
 
+⚠️ **Après une modification du code ou des fichiers dans `static/`, reconstruis l'image avec `docker compose up -d --build`** : un simple `docker compose up` réutiliserait l'ancienne image et tu ne verrais pas tes changements.
+
 Pour arrêter : `Ctrl+C`, puis `docker compose down`.
 
 ## Configuration
 
 | Variable | Rôle | Défaut |
 | --- | --- | --- |
-| `LASTFM_API_KEY` | Clé API Last.fm (obligatoire, **secrète**) | — |
+| `LASTFM_API_KEY` | Clé API Last.fm (**secrète**, obligatoire pour afficher les écoutes) | — |
 | `LASTFM_USER` | Pseudo Last.fm dont on affiche les écoutes (obligatoire) | — |
 | `CACHE_TTL_SECONDS` | Durée de conservation des réponses de Last.fm | `120` |
 | `HISTORY_SECONDS` | Fenêtre d'écoutes affichées | `86400` (24 h) |
