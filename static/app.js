@@ -7,13 +7,20 @@ const infoMeta = document.getElementById("info-meta");
 const counter = document.getElementById("counter");
 const prevBtn = document.getElementById("prev");
 const nextBtn = document.getElementById("next");
+const detailPanel = document.getElementById("detail");
+const detailAlbum = document.getElementById("detail-album");
+const detailArtist = document.getElementById("detail-artist");
+const detailMeta = document.getElementById("detail-meta");
+const detailTracks = document.getElementById("detail-tracks");
+const detailClose = document.getElementById("detail-close");
 
-const MAX_CDS = window.matchMedia("(max-width: 600px)").matches ? 16 : 28;
 const NO_COVER_HASH = "2a96cbd8b46e442fc41c2b86b821562f"; // image vide de Last.fm
+const HISTORY_MS = 24 * 60 * 60 * 1000;  // on ne garde que les écoutes des dernières 24 h
 
 let albums = [];   // un élément par album (le plus récent en premier)
 let cds = [];      // les boutons correspondants
 let current = 0;   // index du CD sélectionné
+let detailOpen = false;
 
 const keyOf = (a) => `${a.artist}||${a.album || a.name}`;
 
@@ -21,16 +28,19 @@ const keyOf = (a) => `${a.artist}||${a.album || a.name}`;
 // Le titre affiché est celui de l'écoute la plus récente de l'album.
 function groupAlbums(tracks) {
   const groups = new Map();
+  const cutoff = Date.now() - HISTORY_MS;
   for (const t of tracks) {
+    if (t.played_at !== null && t.played_at * 1000 < cutoff) continue;  // hors des 24 h
     const key = keyOf(t);
     const g = groups.get(key);
     if (g) {
       g.plays += 1;
+      g.tracks.push(t);
     } else {
-      groups.set(key, { ...t, plays: 1 });
+      groups.set(key, { ...t, plays: 1, tracks: [t] });
     }
   }
-  return [...groups.values()].slice(0, MAX_CDS);
+  return [...groups.values()];  // tous les albums des dernières 24 h, sans limite
 }
 
 function timeAgo(uts) {
@@ -66,8 +76,41 @@ function updateInfo() {
   nextBtn.disabled = current === albums.length - 1;
 }
 
+function renderDetail() {
+  const a = albums[current];
+  if (!a) return;
+  detailAlbum.textContent = a.album || a.name;
+  detailArtist.textContent = a.artist;
+  detailMeta.textContent = `${a.plays} écoute${a.plays > 1 ? "s" : ""} sur les dernières 24 h`;
+  detailTracks.replaceChildren();
+  const seen = new Set();
+  for (const t of a.tracks) {
+    if (seen.has(t.name)) continue;  // un même titre peut avoir été joué plusieurs fois
+    seen.add(t.name);
+    const li = document.createElement("li");
+    if (t.name === a.name) li.className = "current";
+    li.textContent = t.name;
+    const when = document.createElement("span");
+    when.textContent = t.nowplaying ? "en cours d'écoute" : `écouté ${timeAgo(t.played_at)}`;
+    li.appendChild(when);
+    detailTracks.appendChild(li);
+  }
+}
+
+function setDetail(open) {
+  detailOpen = open;
+  scene.classList.toggle("detail-open", open);
+  detailPanel.classList.toggle("open", open);
+  cds.forEach((el, i) => el.classList.toggle("detail", open && i === current));
+  if (open) {
+    renderDetail();
+    detailClose.focus();
+  }
+}
+
 function go(index) {
   if (albums.length === 0) return;
+  if (detailOpen) setDetail(false);
   current = Math.max(0, Math.min(albums.length - 1, index));
   shelf.style.setProperty("--active", current);   // la rangée avance
   cds.forEach((el, i) => {
@@ -103,7 +146,10 @@ function buildCd(album, i) {
     side.className = `side ${name}`;
     el.appendChild(side);
   }
-  el.addEventListener("click", () => go(i));
+  el.addEventListener("click", () => {
+    if (i === current) setDetail(!detailOpen);  // clic sur le CD en avant = ouvrir/fermer la fiche
+    else go(i);
+  });
   return el;
 }
 
@@ -148,6 +194,10 @@ async function load() {
 }
 
 /* --- Navigation : boutons, molette, glissement, clavier --- */
+detailClose.addEventListener("click", (e) => { e.stopPropagation(); setDetail(false); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && detailOpen) setDetail(false);
+});
 nextBtn.addEventListener("click", () => go(current + 1));
 prevBtn.addEventListener("click", () => go(current - 1));
 

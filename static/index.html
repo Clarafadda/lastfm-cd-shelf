@@ -13,7 +13,7 @@
   </header>
 
   <main>
-    <div id="scene"><div id="shelf"></div></div>
+    <div id="scene"><div id="veil"></div><div id="shelf"></div></div>
 
     <section id="player" aria-live="polite">
       <p id="info-title"></p>
@@ -29,6 +29,16 @@
         </button>
       </div>
     </section>
+
+    <aside id="detail" aria-label="Détails de l'album" aria-live="polite">
+      <button id="detail-close" type="button" aria-label="Fermer la fiche">×</button>
+      <p class="detail-label">Album</p>
+      <h2 id="detail-album"></h2>
+      <p id="detail-artist"></p>
+      <p id="detail-meta"></p>
+      <p class="detail-label">Morceaux écoutés ces dernières 24 h</p>
+      <ul id="detail-tracks"></ul>
+    </aside>
   </main>
 
   <script src="app.js"></script>

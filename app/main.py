@@ -15,6 +15,7 @@ load_dotenv()  # lit .env en local ; dans Docker, les variables arrivent par com
 API_KEY = os.environ.get("LASTFM_API_KEY", "")
 USER = os.environ.get("LASTFM_USER", "")
 TTL = int(os.environ.get("CACHE_TTL_SECONDS", "120"))
+HISTORY_SECONDS = int(os.environ.get("HISTORY_SECONDS", str(24 * 3600)))  # fenêtre d'écoutes affichées
 
 LASTFM_URL = "https://ws.audioscrobbler.com/2.0/"
 def is_allowed_image_host(host):
@@ -32,25 +33,54 @@ _covers = {}                                 # url -> (octets, type, instant)
 
 
 async def fetch_from_lastfm():
-    params = {
-        "method": "user.getrecenttracks",
-        "user": USER,
-        "api_key": API_KEY,
-        "format": "json",
-        "limit": 50,
-    }
-    async with httpx.AsyncClient(timeout=5) as client:
-        r = await client.get(LASTFM_URL, params=params)
-    r.raise_for_status()
-    payload = r.json()
-    if "error" in payload:  # Last.fm peut répondre 200 avec une erreur dedans
-        raise RuntimeError(f"Erreur Last.fm {payload['error']}")
-    return payload
-
-
-def normalize(payload):
+    """Toutes les écoutes des dernières 24 h, plus le morceau en cours (sans date)."""
+    cutoff = int(time.time()) - HISTORY_SECONDS
     tracks = []
-    for t in payload["recenttracks"]["track"]:
+    saw_nowplaying = False
+    page = 1
+    per_page = 200  # maximum accepté par Last.fm
+    async with httpx.AsyncClient(timeout=5) as client:
+        while page <= 10:  # garde-fou : 2000 écoutes maximum
+            params = {
+                "method": "user.getrecenttracks",
+                "user": USER,
+                "api_key": API_KEY,
+                "format": "json",
+                "limit": per_page,
+                "page": page,
+            }
+            r = await client.get(LASTFM_URL, params=params)
+            r.raise_for_status()
+            payload = r.json()
+            if "error" in payload:  # Last.fm peut répondre 200 avec une erreur dedans
+                raise RuntimeError(f"Erreur Last.fm {payload['error']}")
+            batch = payload["recenttracks"]["track"]
+            if not batch:
+                break
+            kept = []
+            for t in batch:
+                if t.get("@attr", {}).get("nowplaying") == "true":
+                    if not saw_nowplaying:
+                        kept.append(t)
+                        saw_nowplaying = True
+                    continue
+                try:
+                    uts = int(t["date"]["uts"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if uts >= cutoff:
+                    kept.append(t)
+            tracks.extend(kept)
+            # Dès qu'une écoute sort de la fenêtre, les pages suivantes sont plus vieilles
+            if len(kept) < len(batch) or len(batch) < per_page:
+                break
+            page += 1
+    return tracks
+
+
+def normalize(raw_tracks):
+    tracks = []
+    for t in raw_tracks:
         images = {i["size"]: i["#text"] for i in t.get("image", [])}
         cover = images.get("extralarge") or images.get("large") or ""
         now = t.get("@attr", {}).get("nowplaying") == "true"
@@ -73,11 +103,11 @@ async def recent():
             return {**_cache["data"], "stale": False}
         try:
             print("Appel à Last.fm", flush=True)
-            payload = await fetch_from_lastfm()
+            tracks = await fetch_from_lastfm()
             data = {
                 "user": USER,
                 "fetched_at": int(time.time()),
-                "tracks": normalize(payload),
+                "tracks": normalize(tracks),
             }
             _cache.update(data=data, fetched_at=time.time())
             return {**data, "stale": False}

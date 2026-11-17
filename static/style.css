@@ -3,8 +3,8 @@
     --size: clamp(120px, 24vw, 220px);   /* taille d'un boîtier */
     --gap: calc(var(--size) * 0.5);     /* écart entre deux boîtiers (profondeur) */
     --rx: -22deg;                        /* inclinaison de la vue (de dessus) */
-    --ry: -38deg;                        /* rotation de la rangée */
-    --thick: calc(var(--size) * 0.075);  /* épaisseur d'un boîtier */
+    --ry: -30deg;                        /* rotation de la rangée : un peu plus de face */
+    --thick: calc(var(--size) * 0.04);   /* épaisseur d'un boîtier (plus fine) */
   }
   
   * { box-sizing: border-box; }
@@ -46,9 +46,40 @@
     transform-style: preserve-3d;
     transform: rotateX(var(--rx)) rotateY(var(--ry))
                translateZ(calc(var(--active) * var(--gap)));  /* la rangée avance : le CD choisi passe devant */
-    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+                left 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+                top 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
-  
+
+  /* Mode fiche : la rangée reste immobile, seul le CD cliqué quitte sa place.
+     On annule le transform du shelf pour replacer le CD dans le repère de l'écran :
+     il devient face à nous, centré et nettement agrandi, détaché des autres. */
+  .cd.active.detail {
+    --dx: 19vw;                              /* 50 % - 31 % : recentrage horizontal */
+    --dy: -4vh;                              /* 50 % - 54 % : recentrage vertical */
+    --dz: calc(var(--size) * 0.5);           /* avancée vers la caméra */
+    transform: translateZ(calc(var(--active) * var(--gap) * -1))
+               rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1))
+               translate3d(var(--dx), var(--dy), var(--dz))
+               scale(var(--zoom, 1.9));
+    opacity: 1;
+    z-index: 10;
+  }
+  /* Voile sombre sur tout l'écran ; la rangée passe devant mais s'assombrit,
+     seule la pochette au premier plan garde ses couleurs. */
+  #veil {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
+  #scene.detail-open #veil { opacity: 1; }
+  #scene.detail-open #shelf { z-index: 2; }
+  #scene.detail-open .cd:not(.detail) { filter: brightness(0.55); }
+
   /* Un boîtier = un bouton */
   .cd {
     --dx: 0px; --dy: 0px; --dz: 0px;
@@ -63,10 +94,9 @@
     cursor: pointer;
     transform-style: preserve-3d;
     transform: translate3d(var(--dx), var(--dy), calc(var(--i) * var(--gap) * -1 + var(--dz)));
-    /* --d = position par rapport au CD sélectionné (négatif = déjà passé).
-       Les CD passés restent visibles devant, puis s'estompent quand ils sont trop loin. */
-    opacity: clamp(0, calc(1.6 + var(--d, 0) * 0.3), 1);
-    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.5s ease;
+    /* Les boîtiers restent entièrement opaques, y compris ceux qui avancent dans la rangée. */
+    opacity: 1;
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
     -webkit-tap-highlight-color: transparent;
   }
   .cd.now    { --dx: calc(var(--size) * 0.15); }
@@ -90,10 +120,15 @@
     background: linear-gradient(90deg, #0d0d0d, #3a3a3a);
     z-index: 2;
   }
-  .face::after {                         /* reflet du plastique */
+  /* Une fois cliqué et au premier plan, plus de charnière : la pochette prend toute la place */
+  .cd.detail .face { padding-left: 0; }
+  .cd.detail .face::before { display: none; }
+  .face::after {                         /* reflet du plastique + tranche même vue de face */
     content: "";
     position: absolute; inset: 0;
-    background: linear-gradient(115deg, rgba(255,255,255,.38) 0%, transparent 35%,
+    background: linear-gradient(90deg, transparent calc(100% - var(--thick) * 1.5),
+                                rgba(0, 0, 0, 0.2) 100%),
+                linear-gradient(115deg, rgba(255,255,255,.38) 0%, transparent 35%,
                                 transparent 70%, rgba(255,255,255,.14) 100%);
     pointer-events: none;
     z-index: 3;
@@ -113,15 +148,16 @@
     left: calc(100% - var(--thick) / 2); top: 0;
     width: var(--thick); height: 100%;
     transform: translateZ(calc(var(--thick) / -2)) rotateY(90deg);
-    background: linear-gradient(90deg, #b4b9c1, #dfe2e7);
+    background: linear-gradient(90deg, rgba(140, 150, 165, 0.45), rgba(230, 236, 242, 0.55));
   }
   .side.top {
     left: 0; top: calc(var(--thick) / -2);
     width: 100%; height: var(--thick);
     transform: translateZ(calc(var(--thick) / -2)) rotateX(90deg);
-    background: linear-gradient(#f4f5f7, #cdd0d6);
+    background: linear-gradient(rgba(246, 249, 252, 0.6), rgba(185, 195, 208, 0.45));
   }
   
+
   /* Lecteur : titre, album/artiste, boutons */
   #player {
     position: absolute;
@@ -151,14 +187,75 @@
   .controls button:focus-visible { outline: 3px solid #5b8def; outline-offset: 2px; }
   #counter { font-size: 0.85rem; opacity: 0.6; min-width: 3.5em; text-align: center; }
   
+  /* Fiche album, à droite du CD avancé */
+  #detail {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    width: min(340px, calc(100% - 48px));
+    max-height: 72vh;
+    overflow-y: auto;
+    padding: 20px 22px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.14);
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    z-index: 20;
+  }
+  #detail.open { opacity: 1; transform: translateY(-50%) translateX(0); pointer-events: auto; }
+  #detail-close {
+    position: absolute; right: 12px; top: 10px;
+    z-index: 2;
+    display: grid; place-items: center;
+    width: 32px; height: 32px;
+    border: 0; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--ink); font-size: 1.4rem; line-height: 1;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  #detail-close:hover { background: rgba(0, 0, 0, 0.12); }
+  .detail-label {
+    margin: 0 0 4px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+  #detail h2 { margin: 0 36px 2px 0; font-size: 1.25rem; line-height: 1.25; }
+  #detail-artist { margin: 0; font-size: 0.95rem; opacity: 0.75; }
+  #detail-meta { margin: 6px 0 18px; font-size: 0.82rem; opacity: 0.55; }
+  #detail .detail-label + .detail-label { margin-top: 18px; }
+  #detail-tracks { list-style: none; margin: 0; padding: 0; }
+  #detail-tracks li {
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  #detail-tracks li.current { background: rgba(0, 0, 0, 0.07); font-weight: 600; }
+  #detail-tracks li span { display: block; font-size: 0.75rem; opacity: 0.5; font-weight: 400; }
+
   @media (prefers-reduced-motion: reduce) {
     #shelf, .cd { transition: none; }
+    #detail, #veil { transition: none; }
   }
   
   /* Téléphone en portrait : écran haut, donc rangée plus raide et boîtiers plus grands */
   @media (max-aspect-ratio: 3/4) {
-    :root { --size: 46vw; --rx: -40deg; --ry: -28deg; }
-    #scene { perspective-origin: 85% 6%; }
+    :root { --size: 46vw; --rx: -40deg; --ry: -22deg; }
+    #scene { perspective-origin: 82% 8%; }
     #shelf { left: 14%; top: 60%; }
     .cd.active { --dx: calc(var(--size) * 0.8); --dz: calc(var(--size) * 0.1); }
+    .cd.active.detail { --dx: 36vw; --dy: -10vh; --zoom: 1.5; }
+    #scene.detail-open #player { display: none; }
+    #detail {
+      top: auto; bottom: 12px; left: 12px; right: 12px;
+      width: auto; max-height: 55vh;
+      transform: translateY(20px);
+    }
+    #detail.open { transform: translateY(0); }
   }
