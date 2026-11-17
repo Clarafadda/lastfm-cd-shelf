@@ -19,10 +19,10 @@
   }
   
   header { padding: 16px 20px 0; position: relative; z-index: 5; }
-  h1 { margin: 0; font-size: clamp(1.1rem, 3.8vw, 1.3rem); }
+  h1 { margin: 0; font-size: clamp(1.05rem, 0.9rem + 0.8vw, 2rem); }
   #status {
     margin: 4px 0 0;
-    font-size: clamp(0.8rem, 2.7vw, 0.9rem);
+    font-size: clamp(0.75rem, 0.72rem + 0.35vw, 1.05rem);
     opacity: 0.65;
     overflow-wrap: anywhere;   /* les longs messages d'erreur ne débordent pas */
   }
@@ -177,11 +177,11 @@
     z-index: 5;
   }
   #player p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-  #info-title { font-size: clamp(1rem, 3.4vw, 1.15rem); font-weight: 700; }
-  #info-sub { margin-top: 2px; font-size: clamp(0.82rem, 2.8vw, 0.95rem); }
+  #info-title { font-size: clamp(0.95rem, 0.9rem + 0.65vw, 1.7rem); font-weight: 700; }
+  #info-sub { margin-top: 2px; font-size: clamp(0.8rem, 0.76rem + 0.45vw, 1.3rem); }
   #info-meta {
     margin-top: 4px;
-    font-size: clamp(0.75rem, 2.6vw, 0.85rem);
+    font-size: clamp(0.72rem, 0.7rem + 0.35vw, 1.05rem);
     opacity: 0.6;
   }
   .controls { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
@@ -194,7 +194,10 @@
   }
   .controls button:disabled { opacity: 0.25; cursor: default; }
   .controls button:focus-visible { outline: 3px solid #5b8def; outline-offset: 2px; }
-  #counter { font-size: 0.85rem; opacity: 0.6; min-width: 3.5em; text-align: center; }
+  #counter {
+    font-size: clamp(0.75rem, 0.72rem + 0.35vw, 1rem);
+    opacity: 0.6; min-width: 3.5em; text-align: center;
+  }
   
   /* Fiche album, à droite du CD avancé */
   #detail {
@@ -230,26 +233,26 @@
   #detail-close:hover { background: rgba(0, 0, 0, 0.12); }
   .detail-label {
     margin: 0 0 4px;
-    font-size: clamp(0.66rem, 2.2vw, 0.72rem);
+    font-size: clamp(0.62rem, 0.6rem + 0.25vw, 0.9rem);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     opacity: 0.5;
   }
   #detail h2 {
     margin: 0 36px 2px 0;
-    font-size: clamp(1.05rem, 4vw, 1.25rem);
+    font-size: clamp(1rem, 0.85rem + 1vw, 1.9rem);
     line-height: 1.25;
     overflow-wrap: anywhere;
   }
   #detail-artist {
     margin: 0;
-    font-size: clamp(0.85rem, 3vw, 0.95rem);
+    font-size: clamp(0.82rem, 0.78rem + 0.5vw, 1.35rem);
     opacity: 0.75;
     overflow-wrap: anywhere;
   }
   #detail-meta {
     margin: 6px 0 18px;
-    font-size: clamp(0.74rem, 2.6vw, 0.82rem);
+    font-size: clamp(0.7rem, 0.68rem + 0.35vw, 1.05rem);
     opacity: 0.55;
   }
   #detail .detail-label + .detail-label { margin-top: 18px; }
@@ -257,13 +260,13 @@
   #detail-tracks li {
     padding: 7px 10px;
     border-radius: 8px;
-    font-size: clamp(0.82rem, 2.9vw, 0.9rem);
+    font-size: clamp(0.78rem, 0.74rem + 0.45vw, 1.25rem);
     overflow-wrap: anywhere;
   }
   #detail-tracks li.current { background: rgba(0, 0, 0, 0.07); font-weight: 600; }
   #detail-tracks li span {
     display: block;
-    font-size: clamp(0.68rem, 2.4vw, 0.75rem);
+    font-size: clamp(0.65rem, 0.62rem + 0.3vw, 0.95rem);
     opacity: 0.5;
     font-weight: 400;
   }
