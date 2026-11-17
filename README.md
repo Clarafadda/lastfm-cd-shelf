@@ -18,10 +18,16 @@ Plutôt qu'une liste de pochettes, la profondeur représente le temps : plus un 
 ```bash
 git clone https://github.com/Clarafadda/lastfm-cd-shelf.git
 cd lastfm-cd-shelf
-cp .env.example .env
+docker compose up
 ```
 
-Ouvre `.env` et renseigne ta clé API et ton pseudo Last.fm :
+Ouvre <http://localhost:8000>. Même sans fichier `.env`, l'application démarre : la page affiche alors un message t'invitant à configurer ta clé.
+
+Pour afficher tes écoutes, copie le modèle et renseigne ta clé API et ton pseudo Last.fm :
+
+```bash
+cp .env.example .env
+```
 
 ```
 LASTFM_API_KEY=ta_cle_ici
@@ -29,13 +35,9 @@ LASTFM_USER=ton_pseudo_lastfm
 CACHE_TTL_SECONDS=120
 ```
 
-Puis lance l'application :
+Puis relance avec `docker compose up` (ou `docker compose up -d --force-recreate` si le conteneur tourne déjà).
 
-```bash
-docker compose up
-```
-
-Ouvre <http://localhost:8000>. Pour arrêter : `Ctrl+C`, puis `docker compose down`.
+Pour arrêter : `Ctrl+C`, puis `docker compose down`.
 
 ## Configuration
 
@@ -44,6 +46,7 @@ Ouvre <http://localhost:8000>. Pour arrêter : `Ctrl+C`, puis `docker compose do
 | `LASTFM_API_KEY` | Clé API Last.fm (obligatoire, **secrète**) | — |
 | `LASTFM_USER` | Pseudo Last.fm dont on affiche les écoutes (obligatoire) | — |
 | `CACHE_TTL_SECONDS` | Durée de conservation des réponses de Last.fm | `120` |
+| `HISTORY_SECONDS` | Fenêtre d'écoutes affichées | `86400` (24 h) |
 
 ## Comment ça marche
 

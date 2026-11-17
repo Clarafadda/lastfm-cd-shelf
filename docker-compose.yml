@@ -4,7 +4,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      LASTFM_API_KEY: ${LASTFM_API_KEY:?Crée un fichier .env avec LASTFM_API_KEY}
-      LASTFM_USER: ${LASTFM_USER:?Crée un fichier .env avec LASTFM_USER}
+      LASTFM_API_KEY: ${LASTFM_API_KEY:-}
+      LASTFM_USER: ${LASTFM_USER:-}
       CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-120}
+      HISTORY_SECONDS: ${HISTORY_SECONDS:-86400}
     restart: unless-stopped

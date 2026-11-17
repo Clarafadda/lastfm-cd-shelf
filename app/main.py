@@ -99,6 +99,11 @@ def normalize(raw_tracks):
 
 @app.get("/api/recent")
 async def recent():
+    if not API_KEY or not USER:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Last.fm n'est pas configuré : copie .env.example vers .env et renseigne LASTFM_API_KEY et LASTFM_USER."},
+        )
     async with _lock:
         age = time.time() - _cache["fetched_at"]
         if _cache["data"] is not None and age < TTL:
