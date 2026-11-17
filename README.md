@@ -37,7 +37,7 @@ CACHE_TTL_SECONDS=120
 
 Puis relance avec `docker compose up` (ou `docker compose up -d --force-recreate` si le conteneur tourne déjà).
 
-⚠️ **Après une modification du code ou des fichiers dans `static/`, reconstruis l'image avec `docker compose up -d --build`** : un simple `docker compose up` réutiliserait l'ancienne image et tu ne verrais pas tes changements.
+**Après une modification du code ou des fichiers dans `static/`, reconstruis l'image avec `docker compose up -d --build`** : un simple `docker compose up` réutiliserait l'ancienne image et tu ne verrais pas tes changements.
 
 Pour arrêter : `Ctrl+C`, puis `docker compose down`.
 
