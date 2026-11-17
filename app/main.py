@@ -54,6 +54,7 @@ async def fetch_from_lastfm():
             payload = r.json()
             if "error" in payload:  # Last.fm peut répondre 200 avec une erreur dedans
                 raise RuntimeError(f"Erreur Last.fm {payload['error']}")
+            batch = payload["recenttracks"]["track"]
             if isinstance(batch, dict):
                 batch = [batch]
             if not batch:
