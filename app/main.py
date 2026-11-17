@@ -17,7 +17,11 @@ USER = os.environ.get("LASTFM_USER", "")
 TTL = int(os.environ.get("CACHE_TTL_SECONDS", "120"))
 
 LASTFM_URL = "https://ws.audioscrobbler.com/2.0/"
-ALLOWED_IMAGE_HOSTS = {"lastfm.freetls.fastly.net", "lastfm-img2.akamaized.net"}
+def is_allowed_image_host(host):
+    # Domaines d'images de Last.fm (ils varient : lastfm.*, lastfm-img.*, lastfm-img2.*)
+    return bool(host) and host.startswith("lastfm") and host.endswith(
+        (".freetls.fastly.net", ".akamaized.net")
+    )
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI()
@@ -91,7 +95,7 @@ async def recent():
 @app.get("/api/cover")
 async def cover(u: str = Query(...)):
     parsed = urlparse(u)
-    if parsed.scheme != "https" or parsed.hostname not in ALLOWED_IMAGE_HOSTS:
+    if parsed.scheme != "https" or not is_allowed_image_host(parsed.hostname):
         raise HTTPException(status_code=400, detail="Pochette non autorisée")
 
     hit = _covers.get(u)

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ma rangée de CD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Ma rangée de CD</h1>
+    <p id="status" role="status">Chargement…</p>
+  </header>
+
+  <main>
+    <div id="scene"><div id="shelf"></div></div>
+
+    <section id="player" aria-live="polite">
+      <p id="info-title"></p>
+      <p id="info-sub"></p>
+      <p id="info-meta"></p>
+      <div class="controls">
+        <button id="prev" type="button" aria-label="Précédent">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 5h2.5v14H6zM20 5v14L9.5 12z" fill="currentColor"/></svg>
+        </button>
+        <span id="counter" aria-hidden="true"></span>
+        <button id="next" type="button" aria-label="Suivant">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM4 5l10.5 7L4 19z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
