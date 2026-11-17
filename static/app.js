@@ -72,7 +72,8 @@ function go(index) {
   shelf.style.setProperty("--active", current);   // la rangée avance
   cds.forEach((el, i) => {
     el.classList.toggle("active", i === current);
-    el.classList.toggle("passed", i < current);
+    el.style.setProperty("--d", i - current);          // < 0 : déjà passé, reste devant
+    el.classList.toggle("gone", i < current - 5);
   });
   updateInfo();
 }
@@ -97,6 +98,11 @@ function buildCd(album, i) {
     makeFallback(face, album);
   }
   el.appendChild(face);
+  for (const name of ["right", "top"]) {   // l'épaisseur du boîtier
+    const side = document.createElement("span");
+    side.className = `side ${name}`;
+    el.appendChild(side);
+  }
   el.addEventListener("click", () => go(i));
   return el;
 }

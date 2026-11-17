@@ -4,6 +4,7 @@
     --gap: calc(var(--size) * 0.5);     /* écart entre deux boîtiers (profondeur) */
     --rx: -22deg;                        /* inclinaison de la vue (de dessus) */
     --ry: -38deg;                        /* rotation de la rangée */
+    --thick: calc(var(--size) * 0.075);  /* épaisseur d'un boîtier */
   }
   
   * { box-sizing: border-box; }
@@ -62,12 +63,15 @@
     cursor: pointer;
     transform-style: preserve-3d;
     transform: translate3d(var(--dx), var(--dy), calc(var(--i) * var(--gap) * -1 + var(--dz)));
-    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.4s ease;
+    /* --d = position par rapport au CD sélectionné (négatif = déjà passé).
+       Les CD passés restent visibles devant, puis s'estompent quand ils sont trop loin. */
+    opacity: clamp(0, calc(1.6 + var(--d, 0) * 0.3), 1);
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.5s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .cd.now    { --dx: calc(var(--size) * 0.15); }
   .cd.active { --dx: calc(var(--size) * 1.05); --dy: calc(var(--size) * 0.08); --dz: calc(var(--size) * 0.15); }
-  .cd.passed { opacity: 0; pointer-events: none; }  /* déjà passés : ils filent devant la caméra */
+  .cd.gone { pointer-events: none; }  /* passés depuis longtemps : plus cliquables */
   
   .face {
     position: absolute;
@@ -101,6 +105,21 @@
     color: #fff;
     font-weight: 700;
     font-size: calc(var(--size) * 0.3);
+  }
+  
+  /* Épaisseur : on voit la tranche droite et le dessus, puisqu'on regarde la rangée de côté et d'en haut */
+  .side { position: absolute; display: block; pointer-events: none; }
+  .side.right {
+    left: calc(100% - var(--thick) / 2); top: 0;
+    width: var(--thick); height: 100%;
+    transform: translateZ(calc(var(--thick) / -2)) rotateY(90deg);
+    background: linear-gradient(90deg, #b4b9c1, #dfe2e7);
+  }
+  .side.top {
+    left: 0; top: calc(var(--thick) / -2);
+    width: 100%; height: var(--thick);
+    transform: translateZ(calc(var(--thick) / -2)) rotateX(90deg);
+    background: linear-gradient(#f4f5f7, #cdd0d6);
   }
   
   /* Lecteur : titre, album/artiste, boutons */
