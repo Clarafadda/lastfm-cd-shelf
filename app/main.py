@@ -54,7 +54,8 @@ async def fetch_from_lastfm():
             payload = r.json()
             if "error" in payload:  # Last.fm peut répondre 200 avec une erreur dedans
                 raise RuntimeError(f"Erreur Last.fm {payload['error']}")
-            batch = payload["recenttracks"]["track"]
+            if isinstance(batch, dict):
+                batch = [batch]
             if not batch:
                 break
             kept = []
@@ -148,6 +149,9 @@ async def cover(u: str = Query(...)):
 
     return Response(body, media_type=ctype, headers={"Cache-Control": "public, max-age=86400"})
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}   # ne contacte pas Last.fm, donc ne compte pas dans les appels
 
 # En dernier : sinon "/" capterait aussi les routes /api
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
