@@ -19,8 +19,13 @@
   }
   
   header { padding: 16px 20px 0; position: relative; z-index: 5; }
-  h1 { margin: 0; font-size: 1.3rem; }
-  #status { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.65; }
+  h1 { margin: 0; font-size: clamp(1.1rem, 3.8vw, 1.3rem); }
+  #status {
+    margin: 4px 0 0;
+    font-size: clamp(0.8rem, 2.7vw, 0.9rem);
+    opacity: 0.65;
+    overflow-wrap: anywhere;   /* les longs messages d'erreur ne débordent pas */
+  }
   #status.error { opacity: 1; color: #a1201a; font-weight: 600; }
   
   main { flex: 1; position: relative; min-height: 0; }
@@ -171,10 +176,14 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     z-index: 5;
   }
-  #player p { margin: 0; }
-  #info-title { font-size: 1.15rem; font-weight: 700; }
-  #info-sub { margin-top: 2px; }
-  #info-meta { margin-top: 4px; font-size: 0.85rem; opacity: 0.6; }
+  #player p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  #info-title { font-size: clamp(1rem, 3.4vw, 1.15rem); font-weight: 700; }
+  #info-sub { margin-top: 2px; font-size: clamp(0.82rem, 2.8vw, 0.95rem); }
+  #info-meta {
+    margin-top: 4px;
+    font-size: clamp(0.75rem, 2.6vw, 0.85rem);
+    opacity: 0.6;
+  }
   .controls { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
   .controls button {
     width: 44px; height: 44px;
@@ -221,23 +230,43 @@
   #detail-close:hover { background: rgba(0, 0, 0, 0.12); }
   .detail-label {
     margin: 0 0 4px;
-    font-size: 0.72rem;
+    font-size: clamp(0.66rem, 2.2vw, 0.72rem);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     opacity: 0.5;
   }
-  #detail h2 { margin: 0 36px 2px 0; font-size: 1.25rem; line-height: 1.25; }
-  #detail-artist { margin: 0; font-size: 0.95rem; opacity: 0.75; }
-  #detail-meta { margin: 6px 0 18px; font-size: 0.82rem; opacity: 0.55; }
+  #detail h2 {
+    margin: 0 36px 2px 0;
+    font-size: clamp(1.05rem, 4vw, 1.25rem);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  #detail-artist {
+    margin: 0;
+    font-size: clamp(0.85rem, 3vw, 0.95rem);
+    opacity: 0.75;
+    overflow-wrap: anywhere;
+  }
+  #detail-meta {
+    margin: 6px 0 18px;
+    font-size: clamp(0.74rem, 2.6vw, 0.82rem);
+    opacity: 0.55;
+  }
   #detail .detail-label + .detail-label { margin-top: 18px; }
   #detail-tracks { list-style: none; margin: 0; padding: 0; }
   #detail-tracks li {
     padding: 7px 10px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: clamp(0.82rem, 2.9vw, 0.9rem);
+    overflow-wrap: anywhere;
   }
   #detail-tracks li.current { background: rgba(0, 0, 0, 0.07); font-weight: 600; }
-  #detail-tracks li span { display: block; font-size: 0.75rem; opacity: 0.5; font-weight: 400; }
+  #detail-tracks li span {
+    display: block;
+    font-size: clamp(0.68rem, 2.4vw, 0.75rem);
+    opacity: 0.5;
+    font-weight: 400;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     #shelf, .cd { transition: none; }
@@ -258,4 +287,17 @@
       transform: translateY(20px);
     }
     #detail.open { transform: translateY(0); }
+  }
+
+  /* Petits écrans : moins de marges, textes qui restent lisibles sans déborder */
+  @media (max-width: 480px) {
+    header { padding: 12px 14px 0; }
+    #player {
+      left: 10px; bottom: 10px;
+      width: calc(100% - 20px);
+      padding: 10px 12px;
+    }
+    .controls { gap: 10px; margin-top: 8px; }
+    .controls button { width: 40px; height: 40px; }
+    #detail { padding: 14px 16px; }
   }
