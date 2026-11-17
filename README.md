@@ -1,4 +1,4 @@
-# Ma rangée de CD
+# Mes albums
 
 Une web app qui transforme les morceaux écoutés récemment sur [Last.fm](https://www.last.fm/) en une **rangée de boîtiers de CD en 3D**, vue en perspective. Chaque boîtier est un album, les plus récents sont devant, les plus anciens s'enfoncent dans la profondeur. Le morceau en cours d'écoute sort de la rangée.
 
