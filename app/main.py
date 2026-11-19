@@ -90,7 +90,7 @@ def normalize(raw_tracks):
             "name": t["name"],
             "artist": t["artist"]["#text"],
             "album": t["album"]["#text"],
-            "cover": f"/api/cover?u={quote(cover, safe='')}" if cover else None,
+            "cover": f"api/cover?u={quote(cover, safe='')}" if cover else None,
             "nowplaying": now,
             "played_at": None if now else int(t["date"]["uts"]),
         })
@@ -161,3 +161,17 @@ async def health():
 
 # En dernier : sinon "/" capterait aussi les routes /api
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+
+from fastapi.responses import RedirectResponse
+
+# Le site répond sur "/" ET sur "/albums" (selon que le proxy retire le préfixe ou non)
+site = FastAPI()
+
+
+@site.get("/albums")
+async def albums_slash():
+    return RedirectResponse("/albums/")  # sans le "/" final, les liens relatifs casseraient
+
+
+site.mount("/albums", app)
+site.mount("/", app)
