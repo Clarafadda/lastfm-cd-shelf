@@ -157,7 +157,9 @@ async def cover(u: str = Query(...)):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}   # ne contacte pas Last.fm, donc ne compte pas dans les appels
+    return {"status": "ok"}
+
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 from fastapi.responses import RedirectResponse
 
