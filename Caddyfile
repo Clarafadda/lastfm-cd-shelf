@@ -1,3 +1,21 @@
 student06.wt.thomasjuldo.com {
-	reverse_proxy web:8000
+
+    redir / /albums/ 302
+    redir /counter /counter/ 302
+
+    handle /albums* {
+        reverse_proxy web:8000
+    }
+
+    handle_path /counter/api/* {
+        reverse_proxy api:8082
+    }
+
+    handle_path /counter/* {
+        reverse_proxy site:80
+    }
+
+    handle {
+        respond "Not Found" 404
+    }
 }

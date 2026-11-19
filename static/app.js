@@ -183,7 +183,7 @@ function showError(message) {
 
 async function load() {
   try {
-    const res = await fetch("/api/recent");
+    const res = await fetch("api/recent");
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erreur du serveur.");
     render(data);
