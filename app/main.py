@@ -159,19 +159,16 @@ async def cover(u: str = Query(...)):
 async def health():
     return {"status": "ok"}   # ne contacte pas Last.fm, donc ne compte pas dans les appels
 
-# En dernier : sinon "/" capterait aussi les routes /api
-app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-
 from fastapi.responses import RedirectResponse
 
-# Le site répond sur "/" ET sur "/albums" (selon que le proxy retire le préfixe ou non)
 site = FastAPI()
 
+@site.get("/")
+async def root():
+    return RedirectResponse("/albums/")
 
 @site.get("/albums")
 async def albums_slash():
-    return RedirectResponse("/albums/")  # sans le "/" final, les liens relatifs casseraient
-
+    return RedirectResponse("/albums/")
 
 site.mount("/albums", app)
-site.mount("/", app)
